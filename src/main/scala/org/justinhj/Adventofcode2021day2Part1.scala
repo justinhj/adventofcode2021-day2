@@ -5,12 +5,13 @@ import scala.util.Try
 import zio.prelude._
 
 object AOCUtil {
-  def inputToStrings(name: String): List[String] = {
-    Source.fromResource(name).getLines().toList
+  def inputToStrings(name: String): NonEmptyList[String] = {
+    val iter = Source.fromResource(name).getLines().to(Iterable)
+    NonEmptyList.fromIterable(iter.head, iter.tail)
   }
 }
 
-object Adventofcode2021day2 extends App {
+object Adventofcode2021day2Part1 extends App {
 
   import AOCUtil._
 
@@ -35,7 +36,7 @@ object Adventofcode2021day2 extends App {
     "forward" -> Vec2(1,0)
   )
 
-  def parse(input: List[String]): List[Vec2] = {
+  def parse(input: NonEmptyList[String]): NonEmptyList[Vec2] = {
       input.map {
         line =>
           val pattern = """([a-z]+) (\d+)""".r
@@ -53,19 +54,18 @@ object Adventofcode2021day2 extends App {
       }
   }
 
-  val sampleInput = """forward 5
+  val sampleInputIter = """forward 5
       |down 5
       |forward 8
       |up 3
       |down 8
-      |forward 2""".stripMargin.split("\n").toList
+      |forward 2""".stripMargin.split("\n").to(Iterable)
+  val sampleInput = NonEmptyList.fromIterable(sampleInputIter.head, sampleInputIter.tail)
 
   val part1Input = inputToStrings("day2.txt")
  
-  def solve(input: List[String]): Int = {
-    val nelMoves = NonEmptyList.fromIterableOption(parse(input))
-    val finalPos = nelMoves.get.reduce
-    finalPos.prod()
+  def solve(input: NonEmptyList[String]): Int = {
+    parse(input).reduce.prod()
   }
 
   println(s"sample ${solve(sampleInput)}")
